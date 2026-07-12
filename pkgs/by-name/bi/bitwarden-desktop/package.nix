@@ -16,6 +16,8 @@
   pkg-config,
   rustc,
   rustPlatform,
+  # TODO: Clean up on `staging`
+  llvmPackages,
   stdenv,
   xcbuild,
 }:
@@ -88,7 +90,13 @@ buildNpmPackage (finalAttrs: {
   };
   cargoRoot = "apps/desktop/desktop_native";
 
-  env.ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
+  env = {
+    ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
+  }
+  # TODO: Clean up on `staging`.
+  // lib.optionalAttrs stdenv.hostPlatform.isDarwin {
+    NIX_CFLAGS_LINK = "-fuse-ld=lld";
+  };
 
   nativeBuildInputs = [
     cargo
@@ -106,6 +114,8 @@ buildNpmPackage (finalAttrs: {
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     xcbuild
     darwin.autoSignDarwinBinariesHook
+    # TODO: Clean up on `staging`.
+    llvmPackages.lld
   ];
 
   preBuild = ''
